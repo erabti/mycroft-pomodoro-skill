@@ -13,6 +13,14 @@ Pomodoro is a very good work technique used to mange time, by giving persistent 
 * "start a pomodoro for 20 minutes and 10 minutes"
 * "start pomodoro for 30 minutes work and 10 minutes break"
 * "start a pomodoro for 20 minutes work time and 5 minutes break time"
+* "how much time left for the work time"
+* "how much time left in pomodoro"
+* "pomodoro status"
+* "how much time left for the break"
+* "what is the remaining time for the break"
+* "end pomodoro"
+* "stop pomodoro"
+* "exit pomodoro"
 
 ## Credits 
 erabti
