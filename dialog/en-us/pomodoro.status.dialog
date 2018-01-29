@@ -1,0 +1,4 @@
+There's {{duration}} left for the {{timetype}} time.
+There's {{duration}} to go for the {{timetype}} time.
+{{duration}} left for the next {{timetype}} duration.
+{{duration}} left for the next {{timetype}} time.

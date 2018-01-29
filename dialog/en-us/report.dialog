@@ -1,0 +1,3 @@
+You have done {{worknum}} and {{breaknum}}. The whole time spent in work is {{workspent}} and the whole time spent in break is {{breakspent}}. The total spent time in this session is {{totalspent}}. The total number of runs done is {{runnum}}
+{{worknum}} have been done and {{breaknum}} in total. The time spent in work is {{workspent}} and the time spent in breaks is {{breakspent}}. The total time in this session you spent is {{totalspent}}. The total number of runs finished is {{runnum}}.
+{{worknum}} have been finished and {{breaknum}} in total this session. Time spent in works is {{workspent}} and time spent in braeks is {{breakspent}}. Total time spent is {{totalspent}}. The total number of runs done is {{runnum}}.

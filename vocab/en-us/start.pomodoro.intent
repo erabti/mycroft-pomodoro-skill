@@ -1,0 +1,7 @@
+(pomodoro|a pomodoro)
+start (a pomodoro|pomodoro)
+start (a pomodoro|pomodoro) (for|with| ) {workduration}
+start (a pomodoro|pomodoro) (for|with| ) {workduration} (for|with| ) work time (and| ) (for| with| ) {breakduration} (for| ) break time
+start (a pomodoro|pomodoro) (for|with) {workduration} and {breakduration}
+start (a pomodoro|pomodoro) {workduration} (for|in| ) (work| ) (time| )
+start (a pomodoro|pomodoro) {workduration} (for|in|with| ) (work| ) (time| ) and (for| with| ) {breakduration} (for|with| ) (break| ) (time| )
