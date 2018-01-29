@@ -221,10 +221,10 @@ class PomodoroSkill(MycroftSkill):
 				worknum -= 1 #the same as above
 				timespentnow += workduration - timeleft #time spent so far
 				workspent += timespentnow
-			breaknum -= self.cycles
+			breaknum -= self.runs
 			breakspent += breaknum * breakduration #total time spent in finished short breaks (secs)
-			breakspent += self.cycles * long_breakduration
-			breaknum += self.cycles
+			breakspent += self.runs * long_breakduration
+			breaknum += self.runs
 			workspent += worknum * workduration #total time spent in finished works
 			workspent_ = get_time_human(workspent)
 			breakspent_ = get_time_human(breakspent)
