@@ -11,10 +11,11 @@ Pomodoro is a very good work technique used to manage time, by giving persistent
 3. Not recommended to put the break time longer than the work time.
 4. Not recommended to put the work and break time too short (below 10 seconds).
 
-### IDEA:
+### Terminology:
 1. A cycle is one finished work and one finished break.
 2. A run is four finished cycles.
-3. Long break is duration taken each run.
+3. A long break is a duration taken each run.
+4. A session is all works and breaks taken after stopping pomodoro.
 
 ### TODO:
 1. Make a record to store the sessions.
