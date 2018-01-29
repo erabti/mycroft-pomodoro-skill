@@ -19,13 +19,9 @@ from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
 from adapt.intent import IntentBuilder
 import json
-import sys
-import time
 from datetime import datetime, timedelta
 import dateutil.parser as dparser
-from datetime import datetime, timedelta
 import time
-import dateutil.parser as dparser
 
 __author__ = 'erabti'
 
