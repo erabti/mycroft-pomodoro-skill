@@ -82,7 +82,9 @@ def get_time_human(time_left, tname="", timeleft=False):
         speak_string += "{} {} ".format(minutes, time_string)
     if seconds > 0:
         time_string = "second" if seconds == 1 else "seconds"
-        speak_string += "{} {} ".format(seconds, time_string)
+        speak_string += "{} {}".format(seconds, time_string)
+    if days == 0 and hours == 0 and minutes == 0 and seconds == 0:
+	speak_string = "There is 0 seconds" if timeleft else "0 seconds"
     speak_string += "left on the {} timer".format(timer_name) if timeleft else ""
 
     return speak_string
@@ -98,52 +100,49 @@ class PomodoroSkill(MycroftSkill):
 		self.runs = 0 #number of 4 pomodoro sessions been done
 		self.work_duration = "25 minutes" #default work duration
 		self.break_duration = "5 minutes" #default break duration
-		self.long_break_duration = "10 seconds" #default long break duration
+		self.long_break_duration = "15 minutes" #default long break duration
 		self.long_break_frequency = 4 #default long break frequency
-		self.record = {'breaknum':0,'worknum':0}
-		self.isworking = False
-		self.timetype = 'work'
+		self.record = {'breaknum':0,'worknum':0} #keeps a record of break numbers and work numbers
+		self.isworking = False #checks if pomodoro events are running or canceled
+		self.timetype = 'work' #current work time
 	def initialize(self):
 		self.register_intent_file('start.pomodoro.intent', self.handle_start_intent) #sentences used to start pomodoro
 		self.register_intent_file('get.status.intent', self.handle_status_intent) #sentences used to get status
-#		self.register_intent_file('stop.pomodoro.intent', self.handle_stop_intent) #sentences used to stop
 		self.register_entity_file('workduration.entity') #work duration wild card format
 		self.register_entity_file('breakduration.entity') #break duration wild card format
 		stop_intent = IntentBuilder("StopMySkillIntent").require("StopPomodoroKeyword").build()
     		self.register_intent(stop_intent, self.handle_stop)
 	def handle_start_intent (self, message):
-		self.cycles = 0
+		self.cycles = 0 #cycle: after long_break_frequency
 		self.process_pomodoro_inputs(message) #assign new work and break durations if stated by user
-		self.lg(self.work_duration)
-		self.lg(self.break_duration)
 		self.work_time() # start looping
 	def handle_status_intent(self, message):
-		if self.isworking:
-			duration = self.get_timeleft()
-			next_timetype = 'break'
-			current_timetype = self.timetype
+		if self.isworking: #checking if we're working or not
+			duration = self.get_timeleft() #cuurent timeleft
+			next_timetype = 'break' #the next time type, default is break
+			current_timetype = self.timetype #the current time type
 			if current_timetype == 'break':
 				next_timetype = 'work'
 			elif current_timetype == 'work':
 				next_timetype = 'break'
 			self.speak_dialog('pomodoro.status', data={'duration':duration, 'timetype': next_timetype})
 		else:
-			self.speak("There isn't any pomodoro working right now to give status.")
+			self.speak("There isn't any pomodoro working right now to give status.") #fallback
 	def lg (self, string):
 		LOGGER.debug('***')
 		LOGGER.debug(string)
 	def get_timeleft (self, inHuman=True):
-		timetype = self.timetype
-		timeleft = 0
+		timetype = self.timetype #the current working pomodoro, (work/break)
+		timeleft = 0 #default timeleft for the next pomodoro
 
-		if timetype == 'work':
-			timeleft = self.get_scheduled_event_status('work_time')
-		elif timetype == 'break':
-			timeleft = self.get_scheduled_event_status('break_time')
-		if inHuman:
+		if timetype == 'work': #if current working timetype is 'work'
+			timeleft = self.get_scheduled_event_status('work_time') #get the status of the event 'work_time' which calles break_time()
+		elif timetype == 'break': #if current working timetype is 'break'
+			timeleft = self.get_scheduled_event_status('break_time') #get the status of the event 'break_time' which calles work_time()
+		if inHuman: #if the format is human readable (not in seconds)
 			timeleft = get_time_human(timeleft)
 			return timeleft
-		else:
+		else: #if the format is in seconds
 			return timeleft
 	def process_pomodoro_inputs (self, message):
 		""" Parse inputs
@@ -201,12 +200,14 @@ class PomodoroSkill(MycroftSkill):
 		self.work_duration = "25 minutes" #resetting the work duration to the default one
 		self.break_duration = "5 minutes" #resetting the break duration to the default one
 		self.cancel_timers() #stop all timers
-		self.isworking = False
+		self.isworking = False #setting it as not working
+		self.record['worknum'] = 0 #resetting work number
+		self.record['breaknum']= 0 #resetting break number
 	def give_report(self):
 		""" Speaks the report of the last spent session
 		"""
 		if self.isworking: #checking if there's a pomodoro working or not
-			timetype = self.timetype #get the timetype of the *NEXT* pomodoro (work/break)
+			timetype = self.timetype #get the timetype of the current pomodoro (work/break)
 			timeleft = self.get_timeleft(inHuman=False) #get the time left for the next pomodoro (work/break) in secs
 			worknum = self.record['worknum'] #number of works have been done (including the current one)
 			breaknum = self.record['breaknum'] #number of break have been done (including the current one)
@@ -215,18 +216,23 @@ class PomodoroSkill(MycroftSkill):
 			timespentnow = 0 #for current (work/break) pomodoro spent time so far (not finished yet)
 			workduration = get_sec(parse_to_datetime(self.work_duration, timeleft=True)) #work duration set in secs
 			breakduration = get_sec(parse_to_datetime(self.break_duration, timeleft=True)) #break duration set in secs
-			self.lg("breakduration: "+str(breakduration)+"  workduration: "+str(workduration))
-			if timetype == 'work': #if the *NEXT* timetype is work
-				self.record['breaknum'] -= 1 #then we know it's braek now, so we're taking 1 from the record so we calculate it separately
-				breakspent = self.record['breaknum'] * breakduration #total time spent in finished breaks (secs)
+			long_breakduration = get_sec(parse_to_datetime(self.long_break_duration, timeleft=True)) #long_break duration in secs
+			if timetype == 'break': #if the *NEXT* timetype is work
+				breaknum -= 1 #then we know it's braek now, so we're taking 1 from the record so we calculate it separately
 				timespentnow += breakduration - timeleft #time spent so far
 				breakspent += timespentnow
-			elif timetype == 'break': #if the *NEXT* timetype is break
-				self.record['worknum'] -= 1 #the same as above
-				workspent = self.record['worknum'] * self.work_duration #total time spent in finished works
-				timespentnow += self.work_duration - timeleft #time spent so far
+			elif timetype == 'work': #if the *NEXT* timetype is break
+				worknum -= 1 #the same as above
+				timespentnow += workduration - timeleft #time spent so far
 				workspent += timespentnow
-			totalspent = workspent + breakspent
+			breaknum -= self.cycles
+			breakspent += breaknum * breakduration #total time spent in finished short breaks (secs)
+			breakspent += self.cycles * long_breakduration
+			breaknum += self.cycles
+			workspent += worknum * workduration #total time spent in finished works
+			workspent_ = get_time_human(workspent)
+			breakspent_ = get_time_human(breakspent)
+			totalspent = get_time_human(workspent + breakspent)
 			if worknum == 1:
 				worknum_ = str(worknum)+" work"
 			else:
@@ -236,6 +242,6 @@ class PomodoroSkill(MycroftSkill):
 			else:
 				breaknum_ = str(breaknum) + " breaks"
 
-			self.speak_dialog('report', data={'worknum':worknum_, 'breaknum':breaknum_, 'workspent': workspent, 'breakspent': breakspent, 'totalspent':totalspent,'runnum': self.runs})
+			self.speak_dialog('report', data={'worknum':worknum_, 'breaknum':breaknum_, 'workspent': workspent_, 'breakspent': breakspent_, 'totalspent':totalspent,'runnum': self.runs})
 def create_skill():
     return PomodoroSkill()
